@@ -17,7 +17,7 @@ void GifSplitter::setMainWidget()
     setWindowTitle(tr("gif图片分离工具"));
     mainWidget = new QWidget(this);
     setCentralWidget(mainWidget);
-    gifLabel = new QLabel(tr("gif文件："), this);
+    gifLabel = new QLabel(tr("gif图片："), this);
     gifEdit = new QLineEdit(this);
     gifEdit->setReadOnly(true);
     selectGifBtn = new QPushButton(tr("选择"), this);
@@ -25,11 +25,11 @@ void GifSplitter::setMainWidget()
     gifHLayout->addWidget(gifLabel);
     gifHLayout->addWidget(gifEdit);
     gifHLayout->addWidget(selectGifBtn);
-    showLabel = new QLabel(this);
+    showLabel = new QLabel(tr("选择载入gif图片") ,this);
     showLabel->setAlignment(Qt::AlignCenter);
     outFileLabel = new QLabel(tr("选择输出文件夹："), this);
     outFileEdit = new QLineEdit(this);
-    outFileEdit->setPlaceholderText(tr("若未选择输出文件夹，则根据gif文件名自动创建文件夹"));
+    outFileEdit->setPlaceholderText(tr("若未选择输出文件夹，则根据gif图片名自动创建文件夹"));
     selectOutBtn = new QPushButton(tr("选择"));
     outImgLabel = new QLabel(tr("输出图片格式："), this);
     imgCbB = new QComboBox(this);
@@ -62,9 +62,9 @@ void GifSplitter::setMainWidget()
 void GifSplitter::onSelectGif()
 {
     QString gifFile = QFileDialog::getOpenFileName(this,
-                                                   tr("选择gif文件"),
+                                                   tr("选择gif图片"),
                                                    lastPath,
-                                                   tr("gif文件(*.gif)"));
+                                                   tr("gif图片(*.gif)"));
     if(gifFile.isEmpty())
         return;
     startMovie(gifFile);
@@ -72,6 +72,10 @@ void GifSplitter::onSelectGif()
 
 void GifSplitter::startMovie(const QString &gifFile)
 {
+    if(showLabel->movie()) {
+        showLabel->movie()->stop();
+        showLabel->movie()->deleteLater();
+    }
     gifEdit->setText(gifFile);
     QMovie *movie = new QMovie(gifFile);
     movie->setCacheMode(QMovie::CacheAll);
@@ -83,15 +87,15 @@ void GifSplitter::startMovie(const QString &gifFile)
     //设置显示gif图片的最大宽高
     int tempWidth = img.width();
     int tempHeight = img.height();
-    if(img.height() > 240) {
-        tempHeight = 240;
-        tempWidth = img.width() * 240 / img.height();
+    if(tempHeight > 280) {
+        tempHeight = 280;
+        tempWidth = img.width() * 280 / img.height();
         if(tempWidth > 520) {
-            tempHeight = 520 * 240 / tempWidth;
+            tempHeight = 520 * 280 / tempWidth;
             tempWidth = 520;
         }
     }
-    if(img.width() > 520) {
+    if(tempWidth > 520) {
         tempWidth = 520;
         tempHeight = img.height() * 520 / img.width();
     }
@@ -136,7 +140,7 @@ void GifSplitter::receiveMsg(QString gifDir, QString msg)
     if(msg.isEmpty()) {
         int ret = QMessageBox::information(this,
                                            windowTitle(),
-                                           tr("gif文件分离完毕"),
+                                           tr("gif图片分离完毕"),
                                            tr("确定"),
                                            tr("打开文件夹"));
         if(ret == 1) {
@@ -150,7 +154,7 @@ void GifSplitter::receiveMsg(QString gifDir, QString msg)
     statusBar->showMessage(msg);
 }
 
-//快速拖放gif文件
+//快速拖放gif图片
 void GifSplitter::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasUrls())
